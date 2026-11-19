@@ -100,7 +100,7 @@ O Context, o registro de políticas e as rotas SSR estão em [ENTREGA.md](subequ
 
 Com a API em execução e as dependências de `requirements-dev.txt` instaladas,
 execute `streamlit run frontend_conteudo/app.py` a partir de `codigo/`.
-O feed consulta `GET /perguntas`. O botão **Abrir pergunta** carrega o detalhe
+O feed consulta `GET /perguntas`. O título de cada pergunta abre o detalhe
 com respostas e comentários. Para usar outra instância da API, configure
 `FORUM_API_URL`. Perguntas publicadas pelo Swagger ou pelo painel de validação
 aparecem na próxima consulta.

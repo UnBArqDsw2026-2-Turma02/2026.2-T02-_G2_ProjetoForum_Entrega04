@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from uuid import UUID
 
 import httpx
@@ -25,13 +26,16 @@ def consultar(caminho):
     return resposta.json()
 
 
-st.set_page_config(page_title="Fórum")
+st.set_page_config(page_title="Fórum", page_icon="💬")
+st.html("<style>" + Path(__file__).with_name("forum.css").read_text() + "</style>")
+st.html('''<nav class="forum-nav" aria-label="Navegação principal">
+    <a href="?" target="_self"><span aria-hidden="true">&gt;_</span> Fórum</a>
+    <a class="forum-nav-link" href="?" target="_self">Perguntas</a>
+</nav>''')
 pergunta_id = st.query_params.get("pergunta")
 
 if pergunta_id:
-    if st.button("Voltar às perguntas"):
-        del st.query_params["pergunta"]
-        st.rerun()
+    st.html('<a class="forum-back" href="?" target="_self">← Todas as perguntas</a>')
 
     try:
         pergunta_id = UUID(pergunta_id)
@@ -48,12 +52,18 @@ if pergunta_id:
     for comentario in pergunta["comentarios"]:
         CardConteudo(comentario, "comentario")
 else:
-    st.title("Perguntas")
+    st.html('''<section class="forum-hero">
+        <h1>Fórum de<br><em>perguntas.</em></h1>
+        <div class="forum-art" aria-hidden="true"><i></i><b>&lt;/&gt;</b></div>
+    </section>''')
     perguntas = consultar("/perguntas")
+    busca = st.text_input("Buscar perguntas", placeholder="Buscar por título, assunto ou tag…")
+    termo = busca.strip().casefold()
+    perguntas = [p for p in perguntas if termo in " ".join(
+        [p["titulo"], p["corpo"], *p["tags"]]
+    ).casefold()]
+    st.header("Resultados" if termo else "Discussões recentes")
     if not perguntas:
-        st.info("Nenhuma pergunta publicada.")
-    for pergunta in perguntas:
-        CardConteudo(pergunta, "pergunta", mostrar_tags=True, mostrar_status=True)
-        if st.button("Abrir pergunta", key=pergunta["id"]):
-            st.query_params["pergunta"] = pergunta["id"]
-            st.rerun()
+        st.info("Nenhuma pergunta encontrada." if termo else "Nenhuma pergunta publicada.")
+    for pergunta in sorted(perguntas, key=lambda p: p["data_criacao"], reverse=True):
+        CardConteudo(pergunta, "pergunta", mostrar_tags=True, mostrar_status=True, link_detalhe=True)
