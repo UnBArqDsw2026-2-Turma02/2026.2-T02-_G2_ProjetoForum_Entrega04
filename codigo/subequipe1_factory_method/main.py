@@ -8,8 +8,10 @@ from .dependencias import (
     get_criador_de_pergunta,
     get_criador_de_resposta,
     obter_pergunta,
+    get_repositorio,
 )
 from .produtos import Pergunta
+from .repositorio import RepositorioConteudo
 from .schemas import (
     ComentarioIn,
     ComentarioOut,
@@ -76,3 +78,8 @@ def comentar_pergunta(
         "autor": dados.autor,
         "pergunta": pergunta,
     })
+
+
+@app.get("/perguntas", response_model=list[PerguntaOut], tags=["Perguntas"])
+def listar_perguntas(repositorio: Annotated[RepositorioConteudo, Depends(get_repositorio)]):
+    return repositorio.listar_perguntas()
